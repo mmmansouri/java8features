@@ -6,7 +6,7 @@ import java.util.List;
 
 
 
-public class InterfaceImplementationExamples {
+public class FunctionalInterfaceLambdasExamples {
 
     //interface definition for inline implementation with Lambdas
 
@@ -29,6 +29,13 @@ public class InterfaceImplementationExamples {
     }
 
 
+    @FunctionalInterface
+    interface FunctionalInterface4{
+
+        void singleMethod(String s,String p);
+    }
+
+
     public static void main(String[] args){
 
         FunctionalInterface1 functionalInterface1= ()->System.out.println("Hello world FunctionalInterface1");
@@ -37,6 +44,8 @@ public class InterfaceImplementationExamples {
 
 
         FunctionalInterface2 functionalInterface2= (p)->System.out.println(p);
+        //Or
+        functionalInterface2= System.out::println;
 
         functionalInterface2.singleMethod("Hello world FunctionalInterface2");
 
@@ -44,6 +53,14 @@ public class InterfaceImplementationExamples {
 
         functionalInterface3.singleMethod("Hello world ","FunctionalInterface3");
 
+
+        FunctionalInterface4 functionalInterface4=(s,p)->{
+            String r=s+p;
+            System.out.println(r);
+        };
+
+
+        functionalInterface4.singleMethod("Hello world ","FunctionalInterface4");
 
     }
 

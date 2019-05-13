@@ -12,6 +12,29 @@ public class DevTestDataFactory {
 
     public static Account createAccountWithTransactions(){
 
+        return getAccountWithTransactions();
+    }
+
+
+    public  Account createAccountTransactions(){
+
+        return getAccountWithTransactions();
+    }
+
+    public  static Account getAccountEmpty(){
+
+        return getAccount();
+
+
+    }
+
+    private static Account getAccount() {
+        Account account=new Account();
+        account.setBalance(100);
+        return  account;
+    }
+
+    private static Account getAccountWithTransactions() {
         Account account=new Account();
         account.setBalance(100);
         List<Transaction> operations=new ArrayList<>();
@@ -31,5 +54,6 @@ public class DevTestDataFactory {
 
         return  account;
     }
+
 
 }

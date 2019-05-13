@@ -14,8 +14,14 @@ public class Account {
      List<Transaction> operations=new ArrayList<>();
 
 
-     public void deposit(String value){
+     public Account depositTen(){
+          this.deposit(10);
+
+          return this;
+     }
+     public Account deposit(String value){
                   this.deposit(Integer.valueOf(value));
+                  return this;
      }
      public void deposit(int value){
           addDepositTransaction(value);
