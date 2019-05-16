@@ -1,17 +1,16 @@
 package domain;
 
+import java.util.Date;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Date;
 
 @Data
 @Builder
 public class Transaction {
 
-    int amount;
-    TransactionType transactionType;
-    Date date;
-    int balance;
+  int amount;
+  TransactionType transactionType;
+  Date date;
+  int balance;
 
 }

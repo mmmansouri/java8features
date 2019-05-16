@@ -2,13 +2,13 @@ package org.mmm.java8features.defaultstaticmethods;
 
 public interface SomeInterface {
 
-    void method();
+  static void staticMethod() {
+    System.out.println("The static method in the interface");
+  }
 
-    default void defaultMethod(){
-        System.out.println("The default implementation of the method in the interface");
-    }
+  void method();
 
-    static void staticMethod(){
-        System.out.println("The static method in the interface");
-    }
+  default void defaultMethod() {
+    System.out.println("The default implementation of the method in the interface");
+  }
 }

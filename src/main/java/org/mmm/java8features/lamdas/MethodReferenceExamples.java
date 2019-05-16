@@ -2,86 +2,82 @@ package org.mmm.java8features.lamdas;
 
 import domain.Account;
 import domain.DevTestDataFactory;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class MethodReferenceExamples {
 
 
-    @FunctionalInterface
-    interface DataFactory {
+  public static void main(String[] args) {
 
-        Account createAccount();
-    }
+    referenceToInstanceMethodOfObject();
 
-    public static void main(String[]args){
+    referenceToStaticMethodOfClass();
 
-        referenceToInstanceMethodOfObject();
+    referenceToInstanceMethodOfArbitraryObject();
 
-        referenceToStaticMethodOfClass();
+    referenceToAConstructor();
 
-        referenceToInstanceMethodOfArbitraryObject();
+  }
 
-        referenceToAConstructor();
+  private static void referenceToInstanceMethodOfObject() {
 
-    }
+    DevTestDataFactory devTestDataFactory = new DevTestDataFactory();
+    DataFactory dataFactory = devTestDataFactory::createAccountTransactions;
+    Account account = dataFactory.createAccount(100);
+    System.out.println("-----  referenceToInstanceMethodOfObject -----");
+    account.getOperations().forEach(System.out::println);
+  }
 
+  private static void referenceToStaticMethodOfClass() {
+    DataFactory dataFactory = DevTestDataFactory::createAccountWithTransactions;
+    Account account = dataFactory.createAccount(100);
 
-    private static void referenceToInstanceMethodOfObject(){
+    System.out.println("-----  referenceToStaticMethodOfClass -----");
+    account.getOperations().forEach(System.out::println);
+  }
 
-        DevTestDataFactory devTestDataFactory=new DevTestDataFactory();
-        DataFactory dataFactory = devTestDataFactory::createAccountTransactions;
-        Account account= dataFactory.createAccount();
-        System.out.println("-----  referenceToInstanceMethodOfObject -----");
-        account.getOperations().forEach(System.out::println);
-    }
+  private static void referenceToInstanceMethodOfArbitraryObject() {
 
+    System.out.println("-----  referenceToInstanceMethodOfArbitraryObject  -----");
 
-    private static void referenceToStaticMethodOfClass(){
-        DataFactory dataFactory = DevTestDataFactory::createAccountWithTransactions;
-        Account account= dataFactory.createAccount();
+    DataFactory dataFactory = DevTestDataFactory::getAccountEmpty;
+    Account account1 = dataFactory.createAccount(100);
+    Account account2 = dataFactory.createAccount(110);
+    Account account3 = dataFactory.createAccount(90);
 
-        System.out.println("-----  referenceToStaticMethodOfClass -----");
-        account.getOperations().forEach(System.out::println);
-    }
+    List<Account> accountList = new ArrayList<>();
+    accountList.add(account1);
+    accountList.add(account2);
+    accountList.add(account3);
 
-    private  static void referenceToInstanceMethodOfArbitraryObject(){
+    //Reference To Instance Method Of Arbitrary Object
+    // !CAUTION! : the balance of the transaction will have the value of the arbitrary object chosen
+    accountList.forEach(Account::depositTen);
 
-        System.out.println("-----  referenceToInstanceMethodOfArbitraryObject  -----");
+    accountList.forEach(account -> account.getOperations().forEach(transaction -> {
+      System.out.println("________");
+      System.out.println(transaction);
+    }));
+  }
 
-        DataFactory dataFactory = DevTestDataFactory::getAccountEmpty;
-        Account account1= dataFactory.createAccount();
-        Account account2= dataFactory.createAccount();
-        Account account3= dataFactory.createAccount();
+  private static void referenceToAConstructor() {
 
-        List<Account> accountList=new ArrayList<>();
-        accountList.add(account1);
-        accountList.add(account2);
-        accountList.add(account3);
+    DataFactory dataFactory = Account::new;
 
+    Account account = dataFactory.createAccount(100);
 
-        //Reference To Instance Method Of Arbitrary Object
-        accountList.forEach(Account::depositTen);
+    account.setBalance(100);
 
-        accountList.forEach(account -> account.getOperations().forEach(transaction -> {System.out.println("________");System.out.println(transaction);}));
-    }
-
-
-
-    private static void referenceToAConstructor(){
-
-        DataFactory dataFactory =Account::new;
-
-        Account account=dataFactory.createAccount();
-
-        account.setBalance(100);
-
-        System.out.println("-----  referenceToAConstructor -----");
+    System.out.println("-----  referenceToAConstructor -----");
 
 
-    }
+  }
+
+
+  @FunctionalInterface
+  interface DataFactory {
+
+    Account createAccount(int initialBalance);
+  }
 }

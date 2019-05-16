@@ -9,12 +9,18 @@ import java.util.List;
 @Data
 public class Account {
 
-     int balance=0;
+     int balance;
 
      List<Transaction> operations=new ArrayList<>();
 
+     public Account(int initialBalance){
+
+          this.balance=initialBalance;
+     }
+
 
      public Account depositTen(){
+          System.out.println("--> depositTen method of object "+this);
           this.deposit(10);
 
           return this;
