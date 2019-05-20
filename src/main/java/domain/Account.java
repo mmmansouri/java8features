@@ -1,56 +1,68 @@
 package domain;
 
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class Account {
 
-     int balance;
+  int balance;
 
-     List<Transaction> operations=new ArrayList<>();
+  String accountOwnerName;
 
-     public Account(int initialBalance){
+  List<Transaction> operations = new ArrayList<>();
 
-          this.balance=initialBalance;
-     }
+  public Account(int initialBalance) {
 
-
-     public Account depositTen(){
-          System.out.println("--> depositTen method of object "+this);
-          this.deposit(10);
-
-          return this;
-     }
-     public Account deposit(String value){
-                  this.deposit(Integer.valueOf(value));
-                  return this;
-     }
-     public void deposit(int value){
-          addDepositTransaction(value);
-     }
+    this.balance = initialBalance;
+  }
 
 
-     public void withdrawal(String value){
-          this.withdrawal(Integer.valueOf(value));
-     }
+  public Account depositTen() {
+    System.out.println("--> depositTen method of object " + this);
+    this.deposit(10);
 
-     public void withdrawal(int value){
-          addWithdrawalTransaction(value);
-     }
+    return this;
+  }
 
-     private void addWithdrawalTransaction(int amount) {
-          Transaction transaction=Transaction.builder().transactionType(TransactionType.WITHDRAWAL).amount(amount).date(new Date()).balance(this.balance-amount).build();
-          this.operations.add(transaction);
-          this.balance=transaction.getBalance();
-     }
+  public Account deposit(String value) {
+    this.deposit(Integer.valueOf(value));
+    return this;
+  }
 
-     private void addDepositTransaction(int amount){
-          Transaction transaction=Transaction.builder().transactionType(TransactionType.DEPOSIT).amount(amount).date(new Date()).balance(this.balance+amount).build();
-          this.operations.add(transaction);
-          this.balance=transaction.getBalance();
-     }
+  public void deposit(int value) {
+    addDepositTransaction(value);
+  }
+
+
+  public void withdrawal(String value) {
+    this.withdrawal(Integer.valueOf(value));
+  }
+
+  public void withdrawal(int value) {
+    addWithdrawalTransaction(value);
+  }
+
+  private void addWithdrawalTransaction(int amount) {
+    Transaction transaction = Transaction.builder().transactionType(TransactionType.WITHDRAWAL)
+        .amount(amount).date(new Date()).balance(this.balance - amount).build();
+    this.operations.add(transaction);
+    this.balance = transaction.getBalance();
+  }
+
+  private void addDepositTransaction(int amount) {
+    Transaction transaction = Transaction.builder().transactionType(TransactionType.DEPOSIT)
+        .amount(amount).date(new Date()).balance(this.balance + amount).build();
+    this.operations.add(transaction);
+    this.balance = transaction.getBalance();
+  }
+
+  public void OwnerNameToUpperCase() {
+
+    if (accountOwnerName != null && !accountOwnerName.isEmpty()) {
+      this.accountOwnerName = accountOwnerName.toUpperCase();
+    }
+  }
 }

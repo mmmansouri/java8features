@@ -3,8 +3,13 @@ package org.mmm.java8features.streams;
 import domain.Account;
 import domain.DevTestDataFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class StreamUsageExamples {
 
@@ -14,6 +19,11 @@ public class StreamUsageExamples {
     simpleUsageOfStream();
     mapAndFlatMapUsage();
     reduceExample();
+    streamCreationFromStreamFactory();
+    peekUsageAntiPattenExample();
+    parraleAndSequentialExample();
+    forEachOrderedParraleAndSequentialExample();
+    concatStringListInOneString();
   }
 
 
@@ -54,16 +64,16 @@ public class StreamUsageExamples {
     accountFilteredLists.forEach(System.out::println);
 
     System.out.println("--- Mapped  account list with only balance ---");
-    List<List<Integer>> mappedList = accountFilteredLists.stream()
-        .map(l -> l.stream().map(a -> a.getBalance()).collect(Collectors.toList()))
+    List<List<Account>> mappedList = accountFilteredLists.stream()
+        .map(l -> l)
         .collect(Collectors.toList());
 
     mappedList.forEach(System.out::println);
 
     System.out.println("--- Flat Mapped  account list with only balance ---");
 
-    List<Integer> flatMappedList = accountFilteredLists.stream()
-        .flatMap(l -> l.stream().map(Account::getBalance))
+    List<Account> flatMappedList = accountFilteredLists.stream()
+        .flatMap(l -> l.stream())
         .collect(Collectors.toList());
 
     flatMappedList.forEach(System.out::println);
@@ -80,17 +90,153 @@ public class StreamUsageExamples {
     System.out.println("---- Before reducing ---");
     accountList.forEach(System.out::println);
 
-    Account accountResult = accountList.stream()
-        .reduce(new Account(0), (result, account) -> {
-              result
-                  .setBalance(result.getBalance() + account.getBalance());
-              return result;
-            }
-        );
+    BinaryOperator<Account> binaryOperator = (account1, account2) -> {
+      Account result = DevTestDataFactory.getAccountEmpty(0);
+      System.out
+          .println("In BinaryOperator account object reference " + System.identityHashCode(result));
+      result.setBalance(account1.getBalance() + account2.getBalance());
+      result.setOperations(
+          Stream.concat(account1.getOperations().stream(), account2.getOperations().stream())
+              .collect(Collectors.toList()));
+      return result;
+    };
 
     System.out
-        .println("---- After reducing : Grouping all accounts in one with summing the balances---");
-    System.out.println(accountResult);
+        .println(
+            "---- Reducing in SEQUENTIAL: Grouping all accounts in one with summing the balances---");
+
+    System.out.println("RESULT --> " + accountList.stream().sequential().peek(p ->
+        System.out.println(Thread.currentThread().getName() + " " + p))
+        .reduce(new Account(0), binaryOperator));
+
+    System.out
+        .println(
+            "---- Reducing in PARALLEL: Grouping all accounts in one with summing the balances---");
+
+    System.out.println("RESULT --> " + accountList.stream().parallel().peek(p ->
+        System.out.println(Thread.currentThread().getName() + " " + p))
+        .reduce(new Account(0), binaryOperator, binaryOperator));
+  }
+
+
+  private static void streamCreationFromStreamFactory() {
+    System.out.println("***** - Stream Creation From Stream Factory - ****");
+
+    System.out.println(" -- String Stream Creation -- ");
+    Stream stringStream = Stream.of("One", "Two", "Three");
+    stringStream.forEach(System.out::println);
+
+    IntStream integerStream = IntStream.of(1, 2, 3, 4);
+    System.out.println("-- integer Stream Creation --");
+    integerStream.forEach(System.out::println);
+  }
+
+
+  private static void peekUsageAntiPattenExample() {
+
+    System.out.println("***** - peek Anti-Pattern Usage Example - ****");
+
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    //PEEK should NOT be used this way because this behaviour is non-deterministic due to the
+    // possibility of certain peek() calls being omitted due to internal optimization
+    accountList.stream().peek(a -> a.setAccountOwnerName(a.getAccountOwnerName().toUpperCase()))
+        .forEach(System.out::println);
+
+    List<Account> accountList2 = DevTestDataFactory.getAccountsWithTransactions(100);
+    //Should be done this way
+    accountList2.stream()
+        .forEach(Account::OwnerNameToUpperCase);
+
+    System.out.println(" ---> To Upper Case : ");
+    accountList2.forEach(System.out::println);
+
+  }
+
+  private static void parraleAndSequentialExample() {
+
+    System.out.println("***** - Parallel And Sequential Example - ****");
+
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    accountList.stream().parallel().map(Account::getAccountOwnerName)
+        .peek(p ->
+            System.out.println(Thread.currentThread().getName() + " " + p))
+        .collect(Collectors.toList());
+
+    accountList.stream().sequential().map(Account::getAccountOwnerName)
+        .peek(p ->
+            System.out.println(Thread.currentThread().getName() + " " + p))
+        .collect(Collectors.toList());
+
+  }
+
+
+  private static void forEachOrderedParraleAndSequentialExample() {
+
+    System.out.println("***** - ForEach Parallel And Sequential Example - ****");
+
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    Consumer<Integer> balancePrinter = (i -> System.out
+        .println(Thread.currentThread().getName() + " account balance : " + i));
+
+    System.out.println("-- List Initial Order --- ");
+    for (Account account : accountList) {
+      balancePrinter.accept(account.getBalance());
+    }
+
+    System.out.println(" --- forEach Sequential NOT sorted ->> Not SORTED but Order Kept --- ");
+
+    accountList.stream().sequential().map(Account::getBalance)
+        .forEach(balancePrinter);
+
+    System.out.println(" --- forEach Sequential sorted ->> SORTED  --- ");
+
+    accountList.stream().sequential().map(Account::getBalance).sorted()
+        .forEach(balancePrinter);
+
+    System.out
+        .println(" --- forEachOrdered Sequential NOT sorted ->> NOT SORTED but Order Kept --- ");
+
+    accountList.stream().sequential().map(Account::getBalance)
+        .forEachOrdered(balancePrinter);
+
+    System.out.println(" --- forEachOrdered Sequential sorted ->> SORTED  --- ");
+
+    accountList.stream().sequential().map(Account::getBalance).sorted()
+        .forEachOrdered(balancePrinter);
+
+    System.out.println(" --- forEach Parallel NOT sorted ->> NOT SORTED &  Order NOT Kept--- ");
+    accountList.stream().parallel().map(Account::getBalance)
+        .forEach(balancePrinter);
+
+    System.out.println(" --- forEach Parallel sorted ->> NOT SORTED &  Order NOT Kept --- ");
+    accountList.stream().parallel().map(Account::getBalance).sorted()
+        .forEach(balancePrinter);
+
+    System.out
+        .println(" --- forEachOrdered Parallel NOT sorted ->> NOT SORTED &  Order Kept ! --- ");
+    accountList.stream().parallel().map(Account::getBalance)
+        .forEachOrdered(balancePrinter);
+
+    System.out.println(
+        " --- forEachOrdered Parallel sorted ->> SORTED &  Order Kept but no Parallel execution !--- ");
+    accountList.stream().parallel().map(Account::getBalance).sorted()
+        .forEachOrdered(balancePrinter);
+
+  }
+
+
+  private static void concatStringListInOneString() {
+
+    System.out.println("***** - Concat String List In One String - ****");
+
+    List<String> stringList = Arrays.asList("Momo", "-Man", "-Sou");
+
+    StringBuilder concatString = stringList.stream()
+        .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
+    System.out.println(concatString);
   }
 
 }
