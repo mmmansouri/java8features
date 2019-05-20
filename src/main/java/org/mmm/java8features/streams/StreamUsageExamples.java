@@ -4,6 +4,7 @@ import domain.Account;
 import domain.DevTestDataFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
@@ -18,14 +19,14 @@ public class StreamUsageExamples {
 
     simpleUsageOfStream();
     mapAndFlatMapUsage();
-    reduceExample();
+    reduceSimpleExample();
     streamCreationFromStreamFactory();
     peekUsageAntiPattenExample();
     parraleAndSequentialExample();
     forEachOrderedParraleAndSequentialExample();
     concatStringListInOneString();
+    reduceToMaxElement();
   }
-
 
   private static void simpleUsageOfStream() {
 
@@ -80,10 +81,26 @@ public class StreamUsageExamples {
 
   }
 
-  private static void reduceExample() {
+  private static void reduceToMaxElement() {
 
     //Grouping all accounts in one with summing the balances
-    System.out.println("***** - reduceExample - ****");
+    System.out.println("***** - reduce To Max Element - ****");
+
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    //HOW IT WORKS : Account::getBalance --> p->p.getBalance(); ---> int getBalance(account a){return a.getBalance}
+    Comparator<Account> accountComparator = Comparator.comparingInt(Account::getBalance);
+    BinaryOperator<Account> accountBinaryOperator = BinaryOperator.maxBy(accountComparator);
+
+    accountList.stream().reduce(accountBinaryOperator).ifPresent(System.out::println);
+
+  }
+
+
+  private static void reduceSimpleExample() {
+
+    //Grouping all accounts in one with summing the balances
+    System.out.println("***** - reduceSimpleExample - ****");
 
     List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
 
@@ -117,7 +134,6 @@ public class StreamUsageExamples {
         System.out.println(Thread.currentThread().getName() + " " + p))
         .reduce(new Account(0), binaryOperator, binaryOperator));
   }
-
 
   private static void streamCreationFromStreamFactory() {
     System.out.println("***** - Stream Creation From Stream Factory - ****");
