@@ -1,6 +1,8 @@
 package org.mmm.java8features.streams;
 
 import domain.Account;
+import domain.AccountService;
+import domain.AccountServiceMock;
 import domain.DevTestDataFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,40 +46,19 @@ public class StreamUsageExamples {
 
     System.out.println("*** - mapAndFlatMapUsage - ***");
 
-    List<Account> accountList1 = DevTestDataFactory.getAccountsWithTransactions(100);
-    List<Account> accountList2 = DevTestDataFactory.getAccountsWithTransactions(400);
-    List<Account> accountList3 = DevTestDataFactory.getAccountsWithTransactions(200);
-    List<Account> accountList4 = DevTestDataFactory.getAccountsWithTransactions(300);
 
-    List<List<Account>> accountLists = new ArrayList<>();
+    AccountService accountService=new AccountServiceMock();
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
 
-    accountLists.add(accountList1);
-    accountLists.add(accountList2);
-    accountLists.add(accountList3);
-    accountLists.add(accountList4);
+    System.out.println("Finding attached accounts to each account and adding them to the list :");
+    System.out.println("-> Using map : ");
+    List<List<Account>> accountLists=accountList.stream().map(accountService::findAttachedAccounts).collect(Collectors.toList());
+    accountLists.forEach(System.out::println);
 
-    List<List<Account>> accountFilteredLists = accountLists.stream()
-        .filter(a -> a.stream().mapToInt(Account::getBalance).sum() > 1500)
-        .collect(Collectors.toList());
+    System.out.println("Using flatMap");
 
-    System.out.println("--- Filtered account list balance>1500 ---");
-
-    accountFilteredLists.forEach(System.out::println);
-
-    System.out.println("--- Mapped  account list with only balance ---");
-    List<List<Account>> mappedList = accountFilteredLists.stream()
-        .map(l -> l)
-        .collect(Collectors.toList());
-
-    mappedList.forEach(System.out::println);
-
-    System.out.println("--- Flat Mapped  account list with only balance ---");
-
-    List<Account> flatMappedList = accountFilteredLists.stream()
-        .flatMap(l -> l.stream())
-        .collect(Collectors.toList());
-
-    flatMappedList.forEach(System.out::println);
+    List<Account> accountListFlatted=accountList.stream().flatMap( (a->accountService.findAttachedAccounts(a).stream())).collect(Collectors.toList());
+    accountListFlatted.forEach(System.out::println);
 
   }
 
