@@ -28,6 +28,7 @@ public class StreamUsageExamples {
     forEachOrderedParraleAndSequentialExample();
     concatStringListInOneString();
     reduceToMaxElement();
+    distinctExample();
   }
 
   private static void simpleUsageOfStream() {
@@ -234,6 +235,29 @@ public class StreamUsageExamples {
     StringBuilder concatString = stringList.stream()
         .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
     System.out.println(concatString);
+  }
+
+
+
+  private static void distinctExample(){
+
+    System.out.println("***** - Distinct Example - ****");
+
+    System.out.println("--> Duplicates list");
+    List<Account> accounts=DevTestDataFactory.getAccountsWithTransactions(100);
+
+    accounts.addAll(DevTestDataFactory.getAccountsWithTransactions(100));
+
+    accounts.forEach(System.out::println);
+
+
+    System.out.println("--> Distinct List");
+    accounts.stream().distinct().forEach(System.out::println);
+
+
+
+
+
   }
 
 }
