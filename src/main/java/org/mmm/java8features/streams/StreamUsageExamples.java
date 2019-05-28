@@ -4,10 +4,8 @@ import domain.Account;
 import domain.AccountService;
 import domain.AccountServiceMock;
 import domain.DevTestDataFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -232,9 +230,14 @@ public class StreamUsageExamples {
 
     List<String> stringList = Arrays.asList("Momo", "-Man", "-Sou");
 
+    System.out.println("--> Using StringBuilder");
     StringBuilder concatString = stringList.stream()
         .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
     System.out.println(concatString);
+
+    System.out.println("--> Using StringJoiner");
+    System.out.println(stringList.stream().collect(()->new StringJoiner(""),StringJoiner::add,StringJoiner::merge).toString());
+
   }
 
 
