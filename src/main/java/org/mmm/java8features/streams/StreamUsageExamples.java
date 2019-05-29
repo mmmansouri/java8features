@@ -27,6 +27,7 @@ public class StreamUsageExamples {
     concatStringListInOneString();
     reduceToMaxElement();
     distinctExample();
+    simpleInstanceMatching();
   }
 
   private static void simpleUsageOfStream() {
@@ -261,6 +262,16 @@ public class StreamUsageExamples {
 
 
 
+  }
+
+  public static void simpleInstanceMatching()
+  {
+
+    System.out.println("***** - Simple Instance Matching - ****");
+
+    List<Account> accounts=DevTestDataFactory.getAccountsWithTransactions(100);
+
+    if(accounts.stream().anyMatch(Account.class::isInstance)) System.out.println("--> It Match !");
   }
 
 }
