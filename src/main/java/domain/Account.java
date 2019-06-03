@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NonNull;
 
 @Data
-public class Account {
+public class Account implements Comparable {
 
   int balance;
 
@@ -123,5 +123,24 @@ public class Account {
   public int hashCode() {
 
     return Objects.hash(this.getAccountOwnerName(), this.getBalance());
+  }
+
+  @Override
+  public int compareTo(Object o) {
+    if (o == null) {
+      throw new NullPointerException("Object is null for comparing");
+    }
+
+    Account account = (Account) o;
+
+    if (account.getBalance() > this.getBalance()) {
+      return -1;
+    }
+
+    if (account.getBalance() < this.getBalance()) {
+      return 1;
+    }
+
+    return 0;
   }
 }
