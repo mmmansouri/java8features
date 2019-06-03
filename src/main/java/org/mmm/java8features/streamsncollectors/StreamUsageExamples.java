@@ -1,4 +1,4 @@
-package org.mmm.java8features.streams;
+package org.mmm.java8features.streamsncollectors;
 
 import domain.Account;
 import domain.AccountService;
@@ -17,6 +17,7 @@ public class StreamUsageExamples {
 
   public static void main(String[] args) {
 
+    System.out.println("---------_ _ _ _ - STREAM USAGE EXAMPLE -  _ _ _ _--------");
     simpleUsageOfStream();
     mapAndFlatMapUsage();
     reduceSimpleExample();
@@ -46,18 +47,20 @@ public class StreamUsageExamples {
 
     System.out.println("*** - mapAndFlatMapUsage - ***");
 
-
-    AccountService accountService=new AccountServiceMock();
+    AccountService accountService = new AccountServiceMock();
     List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
 
     System.out.println("Finding attached accounts to each account and adding them to the list :");
     System.out.println("-> Using map : ");
-    List<List<Account>> accountLists=accountList.stream().map(accountService::findAttachedAccounts).collect(Collectors.toList());
+    List<List<Account>> accountLists = accountList.stream()
+        .map(accountService::findAttachedAccounts).collect(Collectors.toList());
     accountLists.forEach(System.out::println);
 
     System.out.println("Using flatMap");
 
-    List<Account> accountListFlatted=accountList.stream().flatMap( (a->accountService.findAttachedAccounts(a).stream())).collect(Collectors.toList());
+    List<Account> accountListFlatted = accountList.stream()
+        .flatMap((a -> accountService.findAttachedAccounts(a).stream()))
+        .collect(Collectors.toList());
     accountListFlatted.forEach(System.out::println);
 
   }
@@ -237,41 +240,38 @@ public class StreamUsageExamples {
     System.out.println(concatString);
 
     System.out.println("--> Using StringJoiner");
-    System.out.println(stringList.stream().collect(()->new StringJoiner(""),StringJoiner::add,StringJoiner::merge).toString());
+    System.out.println(stringList.stream()
+        .collect(() -> new StringJoiner(""), StringJoiner::add, StringJoiner::merge).toString());
 
   }
 
 
-
-  private static void distinctExample(){
+  private static void distinctExample() {
 
     System.out.println("***** - Distinct Example - ****");
 
     System.out.println("--> Duplicates list");
-    List<Account> accounts=DevTestDataFactory.getAccountsWithTransactions(100);
+    List<Account> accounts = DevTestDataFactory.getAccountsWithTransactions(100);
 
     accounts.addAll(DevTestDataFactory.getAccountsWithTransactions(100));
 
     accounts.forEach(System.out::println);
 
-
     System.out.println("--> Distinct List");
     accounts.stream().distinct().forEach(System.out::println);
 
 
-
-
-
   }
 
-  public static void simpleInstanceMatching()
-  {
+  public static void simpleInstanceMatching() {
 
     System.out.println("***** - Simple Instance Matching - ****");
 
-    List<Account> accounts=DevTestDataFactory.getAccountsWithTransactions(100);
+    List<Account> accounts = DevTestDataFactory.getAccountsWithTransactions(100);
 
-    if(accounts.stream().anyMatch(Account.class::isInstance)) System.out.println("--> It Match !");
+    if (accounts.stream().anyMatch(Account.class::isInstance)) {
+      System.out.println("--> It Match !");
+    }
   }
 
 }
