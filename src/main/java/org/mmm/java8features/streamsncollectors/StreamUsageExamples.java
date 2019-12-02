@@ -1,11 +1,11 @@
-package org.mmm.java8features.streams;
+package org.mmm.java8features.streamsncollectors;
 
 import domain.Account;
+import domain.AccountService;
+import domain.AccountServiceMock;
 import domain.DevTestDataFactory;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -17,6 +17,7 @@ public class StreamUsageExamples {
 
   public static void main(String[] args) {
 
+    System.out.println("---------_ _ _ _ - STREAM USAGE EXAMPLE -  _ _ _ _--------");
     simpleUsageOfStream();
     mapAndFlatMapUsage();
     reduceSimpleExample();
@@ -26,6 +27,8 @@ public class StreamUsageExamples {
     forEachOrderedParraleAndSequentialExample();
     concatStringListInOneString();
     reduceToMaxElement();
+    distinctExample();
+    simpleInstanceMatching();
   }
 
   private static void simpleUsageOfStream() {
@@ -44,40 +47,21 @@ public class StreamUsageExamples {
 
     System.out.println("*** - mapAndFlatMapUsage - ***");
 
-    List<Account> accountList1 = DevTestDataFactory.getAccountsWithTransactions(100);
-    List<Account> accountList2 = DevTestDataFactory.getAccountsWithTransactions(400);
-    List<Account> accountList3 = DevTestDataFactory.getAccountsWithTransactions(200);
-    List<Account> accountList4 = DevTestDataFactory.getAccountsWithTransactions(300);
+    AccountService accountService = new AccountServiceMock();
+    List<Account> accountList = DevTestDataFactory.getAccountsWithTransactions(100);
 
-    List<List<Account>> accountLists = new ArrayList<>();
+    System.out.println("Finding attached accounts to each account and adding them to the list :");
+    System.out.println("-> Using map : ");
+    List<List<Account>> accountLists = accountList.stream()
+        .map(accountService::findAttachedAccounts).collect(Collectors.toList());
+    accountLists.forEach(System.out::println);
 
-    accountLists.add(accountList1);
-    accountLists.add(accountList2);
-    accountLists.add(accountList3);
-    accountLists.add(accountList4);
+    System.out.println("Using flatMap");
 
-    List<List<Account>> accountFilteredLists = accountLists.stream()
-        .filter(a -> a.stream().mapToInt(Account::getBalance).sum() > 1500)
+    List<Account> accountListFlatted = accountList.stream()
+        .flatMap((a -> accountService.findAttachedAccounts(a).stream()))
         .collect(Collectors.toList());
-
-    System.out.println("--- Filtered account list balance>1500 ---");
-
-    accountFilteredLists.forEach(System.out::println);
-
-    System.out.println("--- Mapped  account list with only balance ---");
-    List<List<Account>> mappedList = accountFilteredLists.stream()
-        .map(l -> l)
-        .collect(Collectors.toList());
-
-    mappedList.forEach(System.out::println);
-
-    System.out.println("--- Flat Mapped  account list with only balance ---");
-
-    List<Account> flatMappedList = accountFilteredLists.stream()
-        .flatMap(l -> l.stream())
-        .collect(Collectors.toList());
-
-    flatMappedList.forEach(System.out::println);
+    accountListFlatted.forEach(System.out::println);
 
   }
 
@@ -250,9 +234,44 @@ public class StreamUsageExamples {
 
     List<String> stringList = Arrays.asList("Momo", "-Man", "-Sou");
 
+    System.out.println("--> Using StringBuilder");
     StringBuilder concatString = stringList.stream()
         .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append);
     System.out.println(concatString);
+
+    System.out.println("--> Using StringJoiner");
+    System.out.println(stringList.stream()
+        .collect(() -> new StringJoiner(""), StringJoiner::add, StringJoiner::merge).toString());
+
+  }
+
+
+  private static void distinctExample() {
+
+    System.out.println("***** - Distinct Example - ****");
+
+    System.out.println("--> Duplicates list");
+    List<Account> accounts = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    accounts.addAll(DevTestDataFactory.getAccountsWithTransactions(100));
+
+    accounts.forEach(System.out::println);
+
+    System.out.println("--> Distinct List");
+    accounts.stream().distinct().forEach(System.out::println);
+
+
+  }
+
+  public static void simpleInstanceMatching() {
+
+    System.out.println("***** - Simple Instance Matching - ****");
+
+    List<Account> accounts = DevTestDataFactory.getAccountsWithTransactions(100);
+
+    if (accounts.stream().anyMatch(Account.class::isInstance)) {
+      System.out.println("--> It Match !");
+    }
   }
 
 }
